@@ -2,7 +2,7 @@
 Just add a few sample images per class for transfer learning and run [tl_main.py]. It classifies tons of images as a magic
 
 # Install
-Tensorflow==2.4.1
+Tensorflow==2.4.1<br />
 pip install -r requirements.txt
 
 # How to use
