@@ -1,5 +1,5 @@
 # data
-dataset/*
+dataset/
 tmp/
 
 # Byte-compiled / optimized / DLL files
