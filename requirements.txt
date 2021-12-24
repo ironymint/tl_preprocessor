@@ -1,2 +1,3 @@
+tensorflow==2.4.1
 pyyaml
 tensorflow-addons
