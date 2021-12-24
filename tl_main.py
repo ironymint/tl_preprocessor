@@ -7,7 +7,7 @@ from core import effnetv2_configs
 from core import effnetv2_model
 from core import autoaugment
 import argparse
-
+from tqdm import tqdm
 
 import os
 import PIL
@@ -25,17 +25,17 @@ How to use
 # dataset/<dataset_name>/test_classified/: classified result
 """
 
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 INPUT_SIZE = 224
 LR = 5e-3
 EPOCH = 100
-AUGMETATION_TYPE = "AUTO" #AUTO/RANDOM/NO
 
 """
 PATH SETUP
 """
 parser = argparse.ArgumentParser(description='Effinet v2 TL')
 parser.add_argument('--path', type=str, default='', required=True, help="path of model to use")
+parser.add_argument('--aug', type=str, default='NO', required=True, choices=['AUTO', 'RANDOM', 'NO'], help="augmentaion method [AUTO,RANDOM,NO]")
 args = parser.parse_args()
 
 data_dir = args.path +"train/"
@@ -50,14 +50,14 @@ data processing
 """
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
   data_dir,
-  validation_split=0.2,
+  validation_split=0.3,
   subset="training",
   seed=99,
   image_size=(INPUT_SIZE, INPUT_SIZE), batch_size=1)
 
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
   data_dir,
-  validation_split=0.2,
+  validation_split=0.3,
   seed=99,
   subset="validation",
   image_size=(INPUT_SIZE, INPUT_SIZE))
@@ -78,6 +78,9 @@ class_names = train_ds.class_names
 print("class name: ", class_names)
 print("class number: ", len(class_names))
 
+if not os.path.isdir(data_cls_dir):
+  os.mkdir(data_cls_dir)
+
 for cls_name in class_names:
   if os.path.isdir(data_cls_dir+cls_name):
     files = glob.glob(data_cls_dir+cls_name+"/*")
@@ -86,14 +89,15 @@ for cls_name in class_names:
   else:
     os.mkdir(data_cls_dir+cls_name)
 
+
 """
 data Augmetation & normalize
 """
 train_ds = train_ds.unbatch()
-if AUGMETATION_TYPE=="RANDOM":
+if args.aug=="RANDOM":
   print("#Augmentation Method: Random Augmentation")
   train_ds = train_ds.map(lambda x, y: (autoaugment.distort_image_with_randaugment(x,2,15), y)).batch(BATCH_SIZE)  
-elif AUGMETATION_TYPE=="AUTO":
+elif args.aug=="AUTO":
   print("#Augmentation Method: Auto Augmentation")
   train_ds = train_ds.map(lambda x, y: (autoaugment.distort_image_with_autoaugment(x,"v0"), y)).batch(BATCH_SIZE)
 else:
@@ -212,7 +216,7 @@ for epoch in range(EPOCH):
 Classify test data
 """
 idx = 0
-for x_batch_test in test_ds:
+for x_batch_test in tqdm(test_ds):
     test_logits = test_step(x_batch_test)
     for logit in test_logits:
       index_max = np.argmax(np.array(logit))
