@@ -9,5 +9,5 @@ pip install -r requirements.txt
 # How to use
 1. Put a few samples(at least 16) on ["/path/to/dataset/train/<class_name_1>/" , "/path/to/dataset/train/<class_name_2>/", ...]
 2. Put images that you want to classify on "/path/to/dataset/test/imgs/"
-3. Run "python tl_main.py --path /path/to/dataset/"
+3. Run "python tl_main.py --path /path/to/dataset/ --aug {NO/RANDOM/AUTO}"
 4. Check results on "/path/to/dataset/test_classified/"
